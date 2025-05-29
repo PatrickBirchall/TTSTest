@@ -1,0 +1,16 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Piper TTS Model Files
+*.onnx
+*.onnx.json
+
+# Generated audio files
+audio_files/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
