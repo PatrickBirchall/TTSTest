@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech Converter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Text to Speech Converter</h1>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="mb-4">
+                    <label for="text-input" class="block text-sm font-medium text-gray-700 mb-2">Enter your text:</label>
+                    <textarea id="text-input" rows="4" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Type or paste your text here..."></textarea>
+                </div>
+
+                <div class="flex justify-center space-x-4">
+                    <button id="convert-btn" 
+                        class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Convert to Speech
+                    </button>
+                    <button id="download-btn" 
+                        class="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 hidden">
+                        Download Audio
+                    </button>
+                </div>
+
+                <div id="audio-container" class="mt-6 hidden">
+                    <audio id="audio-player" controls class="w-full">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+
+                <div id="error-message" class="mt-4 text-red-500 text-center hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('text-input');
+        const convertBtn = document.getElementById('convert-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const audioContainer = document.getElementById('audio-container');
+        const audioPlayer = document.getElementById('audio-player');
+        const errorMessage = document.getElementById('error-message');
+
+        convertBtn.addEventListener('click', async () => {
+            const text = textInput.value.trim();
+            if (!text) {
+                showError('Please enter some text to convert');
+                return;
+            }
+
+            try {
+                convertBtn.disabled = true;
+                convertBtn.textContent = 'Converting...';
+                errorMessage.classList.add('hidden');
+
+                const response = await fetch('/convert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text }),
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Create a new audio element to ensure clean state
+                    const newAudio = new Audio(`/audio/${data.audio_path}`);
+                    newAudio.onloadeddata = () => {
+                        audioPlayer.src = newAudio.src;
+                        audioContainer.classList.remove('hidden');
+                        downloadBtn.classList.remove('hidden');
+                    };
+                    newAudio.onerror = () => {
+                        showError('Failed to load audio file');
+                    };
+                    
+                    downloadBtn.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = `/audio/${data.audio_path}`;
+                        a.download = data.filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    };
+                } else {
+                    showError(data.error || 'Failed to convert text to speech');
+                }
+            } catch (error) {
+                showError('An error occurred while converting text to speech');
+            } finally {
+                convertBtn.disabled = false;
+                convertBtn.textContent = 'Convert to Speech';
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html> 
