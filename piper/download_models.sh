@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define model name and version
-MODEL="en_US-lessac-high"
+MODEL="en_GB-alan-medium"
 VERSION="v1.0.0"
 
 # Define URLs for model and config files

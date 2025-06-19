@@ -56,8 +56,8 @@ def extract_text_from_file(file_path, file_extension):
         raise Exception(f"Error extracting text from file: {str(e)}")
 
 # Initialize Piper TTS
-model_path = "en_US-lessac-high.onnx"
-config_path = "en_US-lessac-high.onnx.json"
+model_path = "en_GB-alan-medium.onnx"
+config_path = "en_GB-alan-medium.onnx.json"
 try:
     voice = PiperVoice.load(model_path, config_path)
 except Exception as e:

@@ -12,7 +12,7 @@ A text-to-speech implementation using Coqui TTS.
 A lightweight text-to-speech solution that offers:
 - Fast inference speeds
 - Low resource requirements
-- Multiple voice model support
+- Multiple voice model support [list here](https://github.com/rhasspy/piper/blob/master/VOICES.md)
 - Cross-platform compatibility
 
 ### OpenAI
