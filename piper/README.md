@@ -5,9 +5,18 @@ A Flask web application that converts text to speech using Piper TTS.
 ## Features
 
 - Convert text to speech in real-time
+- Upload and extract text from common file formats (TXT, PDF, DOCX, RTF)
+- Drag and drop file upload support
 - Play audio directly in the browser
 - Download generated audio files
 - Modern, responsive UI
+
+## Supported File Formats
+
+- **TXT**: Plain text files
+- **PDF**: Portable Document Format files
+- **DOCX**: Microsoft Word documents
+- **RTF**: Rich Text Format files
 
 ## Prerequisites
 
@@ -43,16 +52,32 @@ python app.py
 
 2. Open your web browser and navigate to:
 ```
-http://localhost:5000
+http://localhost:8888
 ```
 
 ## Usage
 
-1. Enter or paste the text you want to convert to speech
+### Method 1: Direct Text Input
+1. Enter or paste the text you want to convert to speech in the text area
 2. Click "Convert to Speech"
 3. Wait for the conversion to complete
 4. Use the audio player to listen to the generated speech
 5. Click "Download Audio" to save the audio file
+
+### Method 2: File Upload
+1. Click on the upload area or drag and drop a supported file
+2. The text will be automatically extracted and populated in the text area
+3. Review and edit the extracted text if needed
+4. Click "Convert to Speech"
+5. Wait for the conversion to complete
+6. Use the audio player to listen to the generated speech
+7. Click "Download Audio" to save the audio file
+
+## File Upload Limitations
+
+- Maximum file size: 10MB
+- Supported formats: TXT, PDF, DOCX, RTF
+- Files are processed temporarily and not stored on the server
 
 ## License
 

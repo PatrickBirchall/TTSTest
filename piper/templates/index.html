@@ -12,11 +12,29 @@
             <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Text to Speech Converter</h1>
             
             <div class="bg-white rounded-lg shadow-lg p-6">
+                <!-- File Upload Section -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Upload a text file:</label>
+                    <div id="drop-zone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                        <div class="space-y-2">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="text-gray-600">
+                                <span class="font-medium">Click to upload</span> or drag and drop
+                            </div>
+                            <p class="text-xs text-gray-500">TXT, PDF, DOCX, RTF files up to 10MB</p>
+                        </div>
+                        <input id="file-input" type="file" class="hidden" accept=".txt,.pdf,.docx,.rtf">
+                    </div>
+                    <div id="file-info" class="mt-2 text-sm text-gray-600 hidden"></div>
+                </div>
+
                 <div class="mb-4">
                     <label for="text-input" class="block text-sm font-medium text-gray-700 mb-2">Enter your text:</label>
                     <textarea id="text-input" rows="4" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Type or paste your text here..."></textarea>
+                        placeholder="Type or paste your text here, or upload a file above..."></textarea>
                 </div>
 
                 <div class="flex justify-center space-x-4">
@@ -48,6 +66,84 @@
         const audioContainer = document.getElementById('audio-container');
         const audioPlayer = document.getElementById('audio-player');
         const errorMessage = document.getElementById('error-message');
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileInfo = document.getElementById('file-info');
+
+        // File upload handling
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-400', 'bg-blue-50');
+        });
+        
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            // Validate file type
+            const allowedTypes = ['.txt', '.pdf', '.docx', '.rtf'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(fileExtension)) {
+                showError('Please select a valid file type: TXT, PDF, DOCX, or RTF');
+                return;
+            }
+            
+            // Validate file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File size must be less than 10MB');
+                return;
+            }
+            
+            // Show file info
+            fileInfo.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            fileInfo.classList.remove('hidden');
+            
+            // Upload and extract text
+            uploadFile(file);
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    textInput.value = data.text;
+                    showError(''); // Clear any previous errors
+                } else {
+                    showError(data.error || 'Failed to process file');
+                }
+            } catch (error) {
+                showError('An error occurred while processing the file');
+            }
+        }
 
         convertBtn.addEventListener('click', async () => {
             const text = textInput.value.trim();
@@ -104,7 +200,11 @@
 
         function showError(message) {
             errorMessage.textContent = message;
-            errorMessage.classList.remove('hidden');
+            if (message) {
+                errorMessage.classList.remove('hidden');
+            } else {
+                errorMessage.classList.add('hidden');
+            }
         }
     </script>
 </body>
