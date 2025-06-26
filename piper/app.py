@@ -9,6 +9,7 @@ import uuid
 import PyPDF2
 from docx import Document
 import striprtf.striprtf
+from model_downloader import download_models
 
 app = Flask(__name__)
 
@@ -58,6 +59,16 @@ def extract_text_from_file(file_path, file_extension):
 # Initialize Piper TTS
 model_path = "en_GB-alan-medium.onnx"
 config_path = "en_GB-alan-medium.onnx.json"
+
+# Check if model files exist, if not, attempt to download them
+if not (os.path.exists(model_path) and os.path.exists(config_path)):
+    print("Model files not found. Attempting to download...")
+    try:
+        model_path, config_path = download_models()
+    except Exception as e:
+        print(f"Failed to download models: {e}")
+        print("Please download the model files manually or check your internet connection.")
+
 try:
     voice = PiperVoice.load(model_path, config_path)
 except Exception as e:
